@@ -121,6 +121,9 @@ public class TelaInicial {
 		table = new JTable();
 		table.setModel(new DefaultTableModel(
 			new Object[][] {
+				{"1", "12345", "PJ", "Danilo", "2000.0"},
+				{"1", "12345", "PF", "Nilton", "10000.0"},
+				{"1", "12345", "PJ", "Ricardo", "2000.0"},
 			},
 			new String[] {
 				"Agencia", "Conta", "Tipo", "Nome", "Saldo"
@@ -128,13 +131,36 @@ public class TelaInicial {
 		));
 		scrollPane.setViewportView(table);
 		
-		JButton btnNewButton = new JButton("");
-		btnNewButton.setIcon(new ImageIcon(TelaInicial.class.getResource("/sistemaBancario/IconeEntrada.png")));
-		btnNewButton.setBounds(513, 71, 32, 32);
-		frame.getContentPane().add(btnNewButton);
+		JButton btnEntrada = new JButton("");
+		btnEntrada.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				DefaultTableModel tabela = (DefaultTableModel) table.getModel();
+				String nomeConta = txtFieldNome.getText();
+				float novoValor = Float.parseFloat(txtFieldValor.getText());
+				for (int row = 0; row < tabela.getRowCount(); row++) {
+				    String nomeValue = String.valueOf(tabela.getValueAt(row, 3));
+				    String nomeTipo = String.valueOf(tabela.getValueAt(row, 2));
+				    float campoValor = Float.parseFloat(String.valueOf(tabela.getValueAt(row, 4)));
+				    if (nomeValue.equals(nomeConta)) {
+				        float novoAtual;
+				        if ("PJ".equals(nomeTipo)) {
+				            Conta contaPJ = new ContaPessoaJuridica();
+				            novoAtual = contaPJ.debitarValor(campoValor, novoValor);
+				        } else {
+				            novoAtual = campoValor + novoValor;
+				        }
+				        String novoValorString = String.valueOf(novoAtual);
+				        tabela.setValueAt(novoValorString, row, 4);
+				    }
+				}
+			}
+		});
+		btnEntrada.setIcon(new ImageIcon(TelaInicial.class.getResource("/sistemaBancario/IconeEntrada.png")));
+		btnEntrada.setBounds(513, 71, 32, 32);
+		frame.getContentPane().add(btnEntrada);
 		
-		JButton btnNewButton_1 = new JButton("");
-		btnNewButton_1.addActionListener(new ActionListener() {
+		JButton btnCriarConta = new JButton("");
+		btnCriarConta.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// Gerando variáveis
 				String tipo = "none";
@@ -144,10 +170,10 @@ public class TelaInicial {
 				String nome = txtFieldNome.getText();
 				conta.setNomePortador(nome);
 				// Gerando agência e conta
-				int numeroAleatorio = random.nextInt(99999);
-				String numero = String.valueOf(numeroAleatorio);
-				int agenciaAleatoria = random.nextInt(99999);
+				int agenciaAleatoria = random.nextInt(3)+1;
 				String agencia = String.valueOf(agenciaAleatoria);
+				int numeroAleatorio = random.nextInt(99000)+1000;
+				String numero = String.valueOf(numeroAleatorio);
 				// Definindo o tipo da nova conta
 				if (rdbtnPessoaFisica.isSelected()) {
 					tipo = "PF";
@@ -156,21 +182,45 @@ public class TelaInicial {
 					tipo = "PJ";
 				}
 				// Definindo o valor inicial da nova conta
-				String valor = txtFieldValor.getText();
+				Float valor = Float.parseFloat(txtFieldValor.getText());
+				
 				// Adicionando a nova conta na tabela
 				DefaultTableModel tabela = (DefaultTableModel) table.getModel();
-				tabela.addRow(new String[] {agencia, numero, tipo, nome, valor}
+				tabela.addRow(new String[] {agencia, numero, tipo, nome, String.valueOf(valor)}
 				);
 			}
 		});
-		btnNewButton_1.setIcon(new ImageIcon(TelaInicial.class.getResource("/sistemaBancario/IconeSaldo.png")));
-		btnNewButton_1.setBounds(513, 111, 32, 32);
-		frame.getContentPane().add(btnNewButton_1);
+		btnCriarConta.setIcon(new ImageIcon(TelaInicial.class.getResource("/sistemaBancario/IconeSaldo.png")));
+		btnCriarConta.setBounds(513, 111, 32, 32);
+		frame.getContentPane().add(btnCriarConta);
 		
-		JButton btnNewButton_1_1 = new JButton("");
-		btnNewButton_1_1.setIcon(new ImageIcon(TelaInicial.class.getResource("/sistemaBancario/IconeSaida.png")));
-		btnNewButton_1_1.setBounds(513, 151, 32, 32);
-		frame.getContentPane().add(btnNewButton_1_1);
+		JButton btnSaida = new JButton("");
+		btnSaida.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				DefaultTableModel tabela = (DefaultTableModel) table.getModel();
+				String nomeConta = txtFieldNome.getText();
+				float novoValor = Float.parseFloat(txtFieldValor.getText());
+				for (int row = 0; row < tabela.getRowCount(); row++) {
+				    String nomeValue = String.valueOf(tabela.getValueAt(row, 3));
+				    String nomeTipo = String.valueOf(tabela.getValueAt(row, 2));
+				    float campoValor = Float.parseFloat(String.valueOf(tabela.getValueAt(row, 4)));
+				    if (nomeValue.equals(nomeConta)) {
+				        float novoAtual;
+				        if ("PF".equals(nomeTipo)) {
+				            Conta contaPF = new ContaPessoaFisica();
+				            novoAtual = contaPF.sacarValor(campoValor, novoValor);
+				        } else {
+				            novoAtual = campoValor - novoValor;
+				        }
+				        String novoValorString = String.valueOf(novoAtual);
+				        tabela.setValueAt(novoValorString, row, 4);
+				    }
+				}
+			}
+		});
+		btnSaida.setIcon(new ImageIcon(TelaInicial.class.getResource("/sistemaBancario/IconeSaida.png")));
+		btnSaida.setBounds(513, 151, 32, 32);
+		frame.getContentPane().add(btnSaida);
 		
 		rdbtnPessoaFisica = new JRadioButton("Pessoa Física");
 		rdbtnPessoaFisica.addActionListener(new ActionListener() {
@@ -197,3 +247,4 @@ public class TelaInicial {
 		frame.getContentPane().add(rdbtnPessoaJuridica);
 	}
 }
+
